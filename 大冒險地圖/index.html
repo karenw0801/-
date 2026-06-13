@@ -705,7 +705,7 @@
 
             <section class="ending-view" id="endingView" aria-label="星門初啟結局過場">
                 <div class="ending-frame" id="endingFrame">
-                    <button class="music-btn" id="musicBtn" type="button">♪ 勝利音樂</button>
+                    <button class="music-btn" id="musicBtn" type="button">♪ 結局音樂</button>
                     <img class="ending-image" id="endingImage" src="ending (1).png" alt="結局過場圖">
                     <div class="ending-copy">
                         <h2 class="ending-title">星門初啟</h2>
@@ -731,6 +731,18 @@
     </div>
 
     <script>
+        const MUSIC = {
+            start: new Audio("start music.mp3"),
+            map: new Audio("map music.mp3"),
+            ending: new Audio("ending music.mp3")
+        };
+
+        Object.values(MUSIC).forEach(audio => {
+            audio.loop = true;
+            audio.preload = "auto";
+            audio.volume = 0.42;
+        });
+
         const CERTS = [
             {
                 id: "homophone",
@@ -785,10 +797,8 @@
         let pointerDrag = null;
         let endingIndex = 0;
         let isEndingTransitioning = false;
-        let audioCtx = null;
-        let musicGain = null;
-        let musicTimer = null;
-        let musicStarted = false;
+        let currentMusic = null;
+        let pendingMusic = null;
 
         function initAdventureStart() {
             if (!localStorage.getItem("adventure_start")) {
@@ -800,13 +810,68 @@
             const cover = document.getElementById("coverScreen");
             if (sessionStorage.getItem("adventure_cover_seen")) {
                 cover.classList.add("hide");
+                playMusic("map");
                 return;
             }
 
+            playMusic("start");
             cover.addEventListener("click", () => {
                 sessionStorage.setItem("adventure_cover_seen", "true");
                 cover.classList.add("hide");
+                playMusic("map");
             }, { once: true });
+        }
+
+        function playMusic(name) {
+            const next = MUSIC[name];
+            if (!next || currentMusic === next) {
+                if (currentMusic && currentMusic.paused) currentMusic.play().catch(() => pendingMusic = name);
+                return;
+            }
+
+            pendingMusic = name;
+            Object.values(MUSIC).forEach(audio => {
+                if (audio !== next) {
+                    audio.pause();
+                    audio.currentTime = 0;
+                }
+            });
+
+            next.volume = name === "ending" ? 0.5 : 0.42;
+            next.play()
+                .then(() => {
+                    currentMusic = next;
+                    pendingMusic = null;
+                    updateMusicButton(name);
+                })
+                .catch(() => {
+                    pendingMusic = name;
+                    updateMusicButton(name, true);
+                });
+        }
+
+        function updateMusicButton(name, blocked = false) {
+            const musicBtn = document.getElementById("musicBtn");
+            if (!musicBtn) return;
+            if (name === "ending") {
+                musicBtn.textContent = blocked ? "♪ 點我播放" : "♪ 結局音樂中";
+            } else {
+                musicBtn.textContent = "♪ 結局音樂";
+            }
+        }
+
+        function unlockPendingMusic() {
+            if (pendingMusic) playMusic(pendingMusic);
+        }
+
+        function stopAllMusic() {
+            Object.values(MUSIC).forEach(audio => {
+                audio.pause();
+                audio.currentTime = 0;
+            });
+            currentMusic = null;
+            pendingMusic = null;
+            updateMusicButton("");
         }
 
         function hasCert(cert) {
@@ -831,7 +896,7 @@
         function closeGate() {
             document.getElementById("gateModal").classList.remove("show");
             clearPointerDrag();
-            stopVictoryMusic();
+            playMusic("map");
         }
 
         function resetGateBoard() {
@@ -985,7 +1050,7 @@
             document.getElementById("gateGame").classList.add("hidden");
             document.getElementById("endingView").classList.add("show");
             renderEndingScene();
-            startVictoryMusic();
+            playMusic("ending");
         }
 
         function renderEndingScene() {
@@ -1005,13 +1070,12 @@
 
         function advanceEnding() {
             if (isEndingTransitioning) return;
-            startVictoryMusic();
+            playMusic("ending");
 
             if (endingIndex >= ENDING_SCENES.length - 1) {
                 isEndingTransitioning = true;
                 document.getElementById("nextEndingBtn").disabled = true;
                 document.getElementById("endingFrame").classList.add("is-fading");
-                fadeVictoryMusic(0.22, 900);
                 setTimeout(() => {
                     document.getElementById("endingView").classList.remove("show");
                     document.getElementById("endingFrame").classList.remove("is-fading", "is-entering");
@@ -1035,100 +1099,11 @@
         }
 
         function startVictoryMusic() {
-            if (musicStarted) {
-                if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
-                return;
-            }
-            const AudioContext = window.AudioContext || window.webkitAudioContext;
-            if (!AudioContext) return;
-
-            audioCtx = audioCtx || new AudioContext();
-            if (audioCtx.state === "suspended") audioCtx.resume();
-
-            musicGain = audioCtx.createGain();
-            musicGain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
-            musicGain.gain.exponentialRampToValueAtTime(0.18, audioCtx.currentTime + 1.2);
-            musicGain.connect(audioCtx.destination);
-            musicStarted = true;
-            document.getElementById("musicBtn").textContent = "♪ 音樂播放中";
-
-            let step = 0;
-            const melody = [
-                { note: 523.25, length: 0.42 },
-                { note: 659.25, length: 0.42 },
-                { note: 783.99, length: 0.62 },
-                { note: 1046.5, length: 0.9 },
-                { note: 987.77, length: 0.42 },
-                { note: 783.99, length: 0.62 },
-                { note: 880.0, length: 0.82 },
-                { note: 659.25, length: 0.72 }
-            ];
-
-            function playNote() {
-                if (!musicStarted || !audioCtx || !musicGain) return;
-                const item = melody[step % melody.length];
-                const now = audioCtx.currentTime;
-                const osc = audioCtx.createOscillator();
-                const noteGain = audioCtx.createGain();
-                osc.type = step % 4 === 3 ? "triangle" : "sine";
-                osc.frequency.setValueAtTime(item.note, now);
-                noteGain.gain.setValueAtTime(0.0001, now);
-                noteGain.gain.exponentialRampToValueAtTime(0.42, now + 0.05);
-                noteGain.gain.exponentialRampToValueAtTime(0.0001, now + item.length);
-                osc.connect(noteGain);
-                noteGain.connect(musicGain);
-                osc.start(now);
-                osc.stop(now + item.length + 0.05);
-
-                if (step % 2 === 0) {
-                    playSoftChord([item.note / 2, item.note * 0.75], item.length + 0.35);
-                }
-
-                step++;
-                musicTimer = setTimeout(playNote, item.length * 760);
-            }
-
-            playNote();
-        }
-
-        function playSoftChord(frequencies, length) {
-            const now = audioCtx.currentTime;
-            frequencies.forEach(freq => {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = "triangle";
-                osc.frequency.setValueAtTime(freq, now);
-                gain.gain.setValueAtTime(0.0001, now);
-                gain.gain.exponentialRampToValueAtTime(0.09, now + 0.08);
-                gain.gain.exponentialRampToValueAtTime(0.0001, now + length);
-                osc.connect(gain);
-                gain.connect(musicGain);
-                osc.start(now);
-                osc.stop(now + length + 0.05);
-            });
-        }
-
-        function fadeVictoryMusic(target, durationMs) {
-            if (!musicGain || !audioCtx) return;
-            musicGain.gain.cancelScheduledValues(audioCtx.currentTime);
-            musicGain.gain.setValueAtTime(Math.max(musicGain.gain.value, 0.0001), audioCtx.currentTime);
-            musicGain.gain.exponentialRampToValueAtTime(Math.max(target, 0.0001), audioCtx.currentTime + durationMs / 1000);
+            playMusic("ending");
         }
 
         function stopVictoryMusic() {
-            if (!musicStarted) return;
-            if (musicTimer) clearTimeout(musicTimer);
-            if (musicGain && audioCtx) {
-                fadeVictoryMusic(0.0001, 500);
-                setTimeout(() => {
-                    if (musicGain) musicGain.disconnect();
-                    musicGain = null;
-                }, 560);
-            }
-            musicTimer = null;
-            musicStarted = false;
-            const musicBtn = document.getElementById("musicBtn");
-            if (musicBtn) musicBtn.textContent = "♪ 勝利音樂";
+            stopAllMusic();
         }
 
         function showSuccess() {
@@ -1160,7 +1135,7 @@
             sessionStorage.removeItem("adventure_cover_seen");
             DOOR_KEYS.forEach(key => localStorage.removeItem(key));
             Object.keys(placed).forEach(key => delete placed[key]);
-            stopVictoryMusic();
+            stopAllMusic();
             location.reload();
         }
 
@@ -1180,11 +1155,13 @@
         });
         document.getElementById("musicBtn").addEventListener("click", event => {
             event.stopPropagation();
-            startVictoryMusic();
+            playMusic("ending");
         });
         document.getElementById("gateModal").addEventListener("click", event => {
             if (event.target.id === "gateModal") closeGate();
         });
+        document.addEventListener("pointerdown", unlockPendingMusic);
+        document.addEventListener("keydown", unlockPendingMusic);
 
         initAdventureStart();
         initCover();

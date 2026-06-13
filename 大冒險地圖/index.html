@@ -426,6 +426,92 @@
             display: block;
         }
 
+        .ending-view {
+            display: none;
+        }
+
+        .ending-view.show {
+            display: block;
+        }
+
+        .ending-frame {
+            position: relative;
+            overflow: hidden;
+            min-height: min(70vh, 640px);
+            border: 5px solid #f6c857;
+            border-radius: 22px;
+            background: #102457;
+            box-shadow: inset 0 0 36px rgba(255, 231, 142, 0.25);
+            cursor: pointer;
+        }
+
+        .ending-image {
+            width: 100%;
+            min-height: min(70vh, 640px);
+            object-fit: cover;
+            display: block;
+            filter: saturate(1.04);
+        }
+
+        .ending-copy {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            padding: 72px 26px 24px;
+            color: #fffdf0;
+            background: linear-gradient(180deg, transparent, rgba(12, 20, 54, 0.82) 36%, rgba(12, 20, 54, 0.94));
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.42);
+        }
+
+        .ending-title {
+            margin: 0 0 8px;
+            font-size: clamp(34px, 5vw, 58px);
+            color: #ffe27b;
+            letter-spacing: 0;
+        }
+
+        .ending-scene {
+            margin: 0 0 10px;
+            font-size: clamp(18px, 3vw, 25px);
+            font-weight: 950;
+        }
+
+        .ending-text {
+            max-width: 760px;
+            margin: 0 auto;
+            font-size: clamp(19px, 3vw, 28px);
+            font-weight: 900;
+            line-height: 1.55;
+        }
+
+        .ending-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .ending-progress {
+            font-size: 18px;
+            font-weight: 950;
+            color: #fff4bc;
+        }
+
+        .next-ending-btn {
+            border: 0;
+            border-radius: 999px;
+            padding: 12px 22px;
+            font: inherit;
+            font-size: 20px;
+            font-weight: 950;
+            color: #51310c;
+            background: linear-gradient(180deg, #fff6ad, #ffc85b);
+            box-shadow: 0 5px 0 #bd7b20;
+            cursor: pointer;
+        }
+
         .gate-game.hidden {
             display: none;
         }
@@ -489,6 +575,20 @@
             .slots {
                 grid-template-columns: 1fr;
             }
+
+            .ending-frame,
+            .ending-image {
+                min-height: 72vh;
+            }
+
+            .ending-copy {
+                padding: 56px 16px 18px;
+            }
+
+            .ending-controls {
+                align-items: stretch;
+                flex-direction: column;
+            }
         }
     </style>
 </head>
@@ -536,6 +636,21 @@
                 <div class="message" id="message"></div>
             </section>
 
+            <section class="ending-view" id="endingView" aria-label="星門初啟結局過場">
+                <div class="ending-frame" id="endingFrame">
+                    <img class="ending-image" id="endingImage" src="ending (1).png" alt="結局過場圖">
+                    <div class="ending-copy">
+                        <h2 class="ending-title">星門初啟</h2>
+                        <div class="ending-scene" id="endingScene">三枚憑證發光</div>
+                        <div class="ending-text" id="endingText">三個印記不是鑰匙，卻記得你走過的路。</div>
+                        <div class="ending-controls">
+                            <div class="ending-progress" id="endingProgress">1 / 4</div>
+                            <button class="next-ending-btn" id="nextEndingBtn" type="button">下一頁</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <section class="success-view" id="successView">
                 <h2>🏆 冒險完成！</h2>
                 <p>你完成了 3 個關卡！</p>
@@ -576,8 +691,31 @@
         ];
 
         const DOOR_KEYS = ["adventure_door_slots", "adventure_complete"];
+        const ENDING_SCENES = [
+            {
+                image: "ending (1).png",
+                scene: "三枚憑證發光",
+                text: "三個印記不是鑰匙，卻記得你走過的路。"
+            },
+            {
+                image: "ending (2).png",
+                scene: "大門打開",
+                text: "門開了。原來冒險沒有被關在門裡，它一直藏在你願意再試一次的地方。"
+            },
+            {
+                image: "ending (3).png",
+                scene: "地圖回應",
+                text: "咦？地圖好像還留了一頁空白。"
+            },
+            {
+                image: "ending (4).png",
+                scene: "星光落下",
+                text: "今晚，你把三個關卡走成了一條路。明天，星光會記得你來過。"
+            }
+        ];
         const placed = {};
         let pointerDrag = null;
+        let endingIndex = 0;
 
         function initAdventureStart() {
             if (!localStorage.getItem("adventure_start")) {
@@ -626,6 +764,7 @@
             Object.keys(placed).forEach(key => delete placed[key]);
             document.getElementById("door").classList.remove("open");
             document.getElementById("gateGame").classList.remove("hidden");
+            document.getElementById("endingView").classList.remove("show");
             document.getElementById("successView").classList.remove("show");
             document.getElementById("message").textContent = "";
             renderSlots();
@@ -764,7 +903,35 @@
             if (!CERTS.every(cert => placed[cert.id])) return;
             localStorage.setItem("adventure_complete", "true");
             document.getElementById("door").classList.add("open");
-            setTimeout(showSuccess, 950);
+            setTimeout(showEndingStory, 950);
+        }
+
+        function showEndingStory() {
+            endingIndex = 0;
+            document.getElementById("gateGame").classList.add("hidden");
+            document.getElementById("endingView").classList.add("show");
+            renderEndingScene();
+        }
+
+        function renderEndingScene() {
+            const scene = ENDING_SCENES[endingIndex];
+            document.getElementById("endingImage").src = scene.image;
+            document.getElementById("endingImage").alt = `星門初啟：${scene.scene}`;
+            document.getElementById("endingScene").textContent = scene.scene;
+            document.getElementById("endingText").textContent = scene.text;
+            document.getElementById("endingProgress").textContent = `${endingIndex + 1} / ${ENDING_SCENES.length}`;
+            document.getElementById("nextEndingBtn").textContent = endingIndex === ENDING_SCENES.length - 1 ? "冒險完成" : "下一頁";
+        }
+
+        function advanceEnding() {
+            if (endingIndex < ENDING_SCENES.length - 1) {
+                endingIndex++;
+                renderEndingScene();
+                return;
+            }
+
+            document.getElementById("endingView").classList.remove("show");
+            showSuccess();
         }
 
         function showSuccess() {
@@ -808,6 +975,11 @@
         document.getElementById("clearBtn").addEventListener("click", clearProgress);
         document.getElementById("closeModalBtn").addEventListener("click", closeGate);
         document.getElementById("restartAdventureBtn").addEventListener("click", clearProgress);
+        document.getElementById("endingFrame").addEventListener("click", advanceEnding);
+        document.getElementById("nextEndingBtn").addEventListener("click", event => {
+            event.stopPropagation();
+            advanceEnding();
+        });
         document.getElementById("gateModal").addEventListener("click", event => {
             if (event.target.id === "gateModal") closeGate();
         });

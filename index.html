@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 能做什麼 - 教師的最佳助手</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Noto+Sans+TC:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --accent-warm: #ff9800;
+            --accent-warm-light: #ffc107;
+            --card-bg: #222222;
+            --border-radius: 16px;
+        }
+
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 50px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        h1 {
+            color: var(--accent-warm);
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        header p {
+            font-size: 1.2rem;
+            color: #aaa;
+        }
+
+        h2 {
+            color: var(--accent-warm-light);
+            border-bottom: 2px solid var(--accent-warm);
+            padding-bottom: 12px;
+            margin-top: 50px;
+            font-size: 1.8rem;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-left: 4px solid var(--accent-warm);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(255, 152, 0, 0.15);
+        }
+
+        .card h3 {
+            color: var(--accent-warm);
+            margin-top: 0;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 15px;
+            font-size: 1.05rem;
+        }
+
+        .highlight {
+            color: var(--accent-warm-light);
+            font-weight: 600;
+        }
+
+        .do-dont-container {
+            display: flex;
+            gap: 25px;
+        }
+
+        .do-box, .dont-box {
+            flex: 1;
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .do-box h3 { 
+            color: #4caf50; 
+            border-bottom: 2px solid #4caf50;
+            padding-bottom: 10px;
+        }
+        .dont-box h3 { 
+            color: #f44336; 
+            border-bottom: 2px solid #f44336;
+            padding-bottom: 10px;
+        }
+
+        .plugin-list li {
+            background: #2a2a2a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            list-style-type: none;
+        }
+        
+        .plugin-list {
+            padding-left: 0;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            .do-dont-container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>嗨！我是 Antigravity 🚀</h1>
+            <p>你的專屬 AI 教學助理（Powered by Gemini 3.1 Pro）</p>
+        </header>
+
+        <section>
+            <h2>🤖 我是誰？結合 Antigravity 後能做什麼？</h2>
+            <div class="card">
+                <p>你好！雖然你可能聽過 Claude，但我其實是由 Google DeepMind 團隊打造的 <strong>Antigravity</strong>，並且使用了強大的 Gemini 3.1 Pro 模型！</p>
+                <p>我不僅僅是一個能跟你聊天的語言模型，我更像是一個<strong>具有行動力的超級助理</strong>。結合 Antigravity 的能力，我不只會「提供建議」，還能「實際操作」。我可以幫你寫程式、在你的電腦裡建立檔案與資料夾、讀取資料、甚至直接執行指令來完成自動化工作。對於老師來說，我能成為你備課、班級經營與行政工作上的最強後盾！</p>
+            </div>
+        </section>
+
+        <section>
+            <h2>✨ 老師的日常超能力（應用範例）</h2>
+            
+            <div class="card">
+                <h3>📝 1. 教材製作與出考卷</h3>
+                <p>不用再對著空白的 Word 發呆，只要給我範圍跟難度，我能瞬間為你準備好測驗與素材。</p>
+                <ul>
+                    <li><span class="highlight">範例情境：</span>「請幫我出一份針對小學五年級『光與影』單元的自然科選擇題 10 題，需包含標準答案與詳解，並幫我存成一份 markdown 或 HTML 檔。」</li>
+                    <li><span class="highlight">Antigravity 動作：</span>我會生成題目，並<strong>直接在你的電腦桌面建立一個檔案</strong>讓你直接列印或修改！</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h3>🏫 2. 班級經營與活動規劃</h3>
+                <p>各種班級活動規劃、獎勵制度設計，我都能給你靈感並做出實體數位工具。</p>
+                <ul>
+                    <li><span class="highlight">範例情境：</span>「我想在班上推行『環保小尖兵』積點制度，請幫我寫一個簡單的計分板網頁，讓我可以在課堂上用大螢幕投射出來。」</li>
+                    <li><span class="highlight">Antigravity 動作：</span>我不只給你規則建議，還能<strong>直接幫你寫出一個美觀的計分板網頁程式</strong>，讓你在課堂上立刻能使用！</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h3>👨‍👩‍👧‍👦 3. 親師溝通與聯絡</h3>
+                <p>遇到敏感問題不知道怎麼跟家長開口？讓我幫你潤飾文字，化解尷尬。</p>
+                <ul>
+                    <li><span class="highlight">範例情境：</span>「小明最近上課常打瞌睡、作業也沒交。請幫我草擬一封給小明家長的 Line 訊息，語氣要委婉關心，但也要明確點出問題，不要讓家長覺得我在指責。」</li>
+                    <li><span class="highlight">Antigravity 動作：</span>提供得體、有溫度、並且重點清晰的溝通草稿，讓你直接複製貼上。</li>
+                </ul>
+            </div>
+            
+            <div class="card">
+                <h3>📊 4. 行政繁瑣工作自動化</h3>
+                <p>整理成績、大量分類檔案，這些機械化的工作交給我就對了。</p>
+                <ul>
+                    <li><span class="highlight">範例情境：</span>「我的下載資料夾裡有很多學生繳交的作業，檔名都是『學號_姓名_作業.pdf』，請幫我寫一個腳本，自動把它們依照學號排序並建立資料夾分類。」</li>
+                    <li><span class="highlight">Antigravity 動作：</span>我可以寫好自動化腳本，並<strong>在你的同意下直接幫你執行整理</strong>，省下你半天的時間！</li>
+                </ul>
+            </div>
+        </section>
+
+        <section>
+            <h2>🔌 推薦老師必裝的 Antigravity 擴充功能 (Plugins)</h2>
+            <p>Antigravity 支援許多擴充功能來增強我的能力，以下是老師們最該安裝的 3 個：</p>
+            <ul class="plugin-list">
+                <li>
+                    <strong>🎨 Modern Web Guidance Plugin</strong><br>
+                    <span class="highlight">為什麼推薦？</span>如果老師想要製作簡單的教學互動網頁、班級公佈欄、或是計分板，這個外掛能指導我幫你做出符合現代美學、動態又吸睛的介面，讓學生看了就覺得「老師好厲害」！
+                </li>
+                <li>
+                    <strong>🔬 Science Plugin</strong><br>
+                    <span class="highlight">為什麼推薦？</span>特別推薦給自然科、生物科老師！這個強大的擴充能讓我直接連接各種真實的科學資料庫（如 PubMed, 蛋白質結構資料庫等），幫你抓取最真實、正確的科學數據來豐富你的備課內容，甚至帶學生看真實的科學文獻。
+                </li>
+                <li>
+                    <strong>🛠️ Chrome Devtools Plugin</strong><br>
+                    <span class="highlight">為什麼推薦？</span>適合資訊科老師或是進階製作教材時使用。當我們一起開發教學網頁小遊戲時，它可以幫我們自動化除錯網頁問題，確保教材在學生的瀏覽器上完美運行。
+                </li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>💬 怎麼跟我說話，才能得到最好的回答？</h2>
+            <div class="do-dont-container">
+                <div class="do-box">
+                    <h3>✅ DO：這樣做很棒</h3>
+                    <ul>
+                        <li><strong>給予具體背景：</strong>「我是國中二年級的歷史老師...」、「我的學生程度偏弱...」這樣我才能量身定做難易度與內容。</li>
+                        <li><strong>提供範例與格式：</strong>「請用表格呈現，包含欄位 A、B、C」、「請參考這個語氣...」</li>
+                        <li><strong>將大任務拆解：</strong>與其說「幫我規劃一學期的課」，不如先說「請列出前四周的大綱」，確認沒問題後再一段一段讓我幫你完成。</li>
+                        <li><strong>勇敢讓我「動手做」：</strong>請記得我可以直接在你電腦上建立檔案，所以可以直接說「幫我在桌面建立一個名為OO的資料夾並放進考卷」。</li>
+                    </ul>
+                </div>
+                <div class="dont-box">
+                    <h3>❌ DON'T：盡量避免</h3>
+                    <ul>
+                        <li><strong>指令過於模糊：</strong>「幫我出國文考卷。」（太短了！請告訴我：年級、範圍、題型、題數）</li>
+                        <li><strong>忘記檢查事實：</strong>AI 偶爾還是會出現幻覺（尤其是冷門歷史事件或複雜數學運算），請務必親自確認過內容再發給學生。</li>
+                        <li><strong>把敏感個資丟給我：</strong>請養成習慣，用化名（如：小明、A同學）來代替學生的真實姓名與身分證字號，保護學生隱私！</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>

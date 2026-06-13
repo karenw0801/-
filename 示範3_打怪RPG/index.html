@@ -552,7 +552,7 @@
                 "解釋": "「得」常用在動作後面，說明做得怎麼樣。"
             },
             {
-                "題目": "「這本是___書。」應該填哪一個字？", "題目拼音": "Zhè běn shì ___ shū.",
+                "題目": "「這是誰___書？」應該填哪一個字？", "題目拼音": "Zhè shì shéi ___ shū?",
                 "A": "的", "A拼音": "de", "B": "得", "B拼音": "de", "C": "地", "C拼音": "de", "D": "底", "D拼音": "dǐ",
                 "解釋": "「的」表示所屬關係。"
             },
@@ -588,6 +588,17 @@
             }
         ];
 
+        function normalizeQuestion(q) {
+            if (q["題目"] && q["題目"].includes("這本是___書")) {
+                q["題目"] = "「這是誰___書？」應該填哪一個字？";
+                q["題目拼音"] = "Zhè shì shéi ___ shū?";
+                q["A"] = "的";
+                q["A拼音"] = "de";
+                q["解釋"] = "「的」表示所屬關係。";
+            }
+            return q;
+        }
+
         // --- Game State ---
         let questionsPool = [];
         let currentQuestion = null;
@@ -617,11 +628,11 @@
                 const res = await fetch(url);
                 if(!res.ok) throw new Error("Fetch failed");
                 const text = await res.text();
-                questionsPool = parseCSV(text);
+                questionsPool = parseCSV(text).map(normalizeQuestion);
                 if(questionsPool.length < 5) throw new Error("Not enough questions in CSV");
             } catch(e) {
                 console.log("Using fallback questions.", e);
-                questionsPool = [...fallbackQuestions];
+                questionsPool = fallbackQuestions.map(q => normalizeQuestion({...q}));
             }
             
             document.getElementById('loading-view').classList.add('hidden');
@@ -649,7 +660,7 @@
         }
 
         function nextQuestion() {
-            if(questionsPool.length === 0) questionsPool = [...fallbackQuestions];
+            if(questionsPool.length === 0) questionsPool = fallbackQuestions.map(q => normalizeQuestion({...q}));
             const qIdx = Math.floor(Math.random() * questionsPool.length);
             currentQuestion = questionsPool.splice(qIdx, 1)[0];
             
